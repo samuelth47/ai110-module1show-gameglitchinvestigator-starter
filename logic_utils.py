@@ -1,13 +1,19 @@
-# FIX: Moved difficulty range logic from app.py; Hard now correctly returns (1, 50)
+# FIX: Normal (8) had more attempts than Easy (6), making Normal easier — corrected to Easy 10, Normal 7, Hard 5
+def get_attempt_limit(difficulty: str) -> int:
+    """Return the number of allowed guesses for a given difficulty."""
+    limits = {"Easy": 10, "Normal": 7, "Hard": 5}
+    return limits.get(difficulty, 7)
+
+
 def get_range_for_difficulty(difficulty: str):
     """Return (low, high) inclusive range for a given difficulty."""
     if difficulty == "Easy":
-        return 1, 20
+        return 1, 10
     if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
         return 1, 50
-    return 1, 100
+    if difficulty == "Hard":
+        return 1, 100
+    return 1, 50
 
 
 # FIX: Moved input parsing from app.py; handles None, empty, float strings, and non-numeric input

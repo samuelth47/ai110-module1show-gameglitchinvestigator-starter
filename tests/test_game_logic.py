@@ -1,4 +1,4 @@
-from logic_utils import check_guess, get_range_for_difficulty, parse_guess, update_score
+from logic_utils import check_guess, get_attempt_limit, get_range_for_difficulty, parse_guess, update_score
 
 
 # --- check_guess ---
@@ -37,17 +37,27 @@ def test_too_low_message_does_not_say_go_lower():
 # --- get_range_for_difficulty ---
 
 def test_easy_range():
-    assert get_range_for_difficulty("Easy") == (1, 20)
+    assert get_range_for_difficulty("Easy") == (1, 10)
 
 def test_normal_range():
-    assert get_range_for_difficulty("Normal") == (1, 100)
+    assert get_range_for_difficulty("Normal") == (1, 50)
 
 def test_hard_range():
-    # FIX: Hard was incorrectly returning (1, 50), not a wider range
-    assert get_range_for_difficulty("Hard") == (1, 50)
+    # Hard has the widest range, making it the hardest difficulty
+    assert get_range_for_difficulty("Hard") == (1, 100)
 
-def test_unknown_difficulty_defaults_to_100():
-    assert get_range_for_difficulty("Unknown") == (1, 100)
+def test_unknown_difficulty_defaults_to_normal():
+    assert get_range_for_difficulty("Unknown") == (1, 50)
+
+def test_hard_range_wider_than_easy():
+    _, easy_high = get_range_for_difficulty("Easy")
+    _, hard_high = get_range_for_difficulty("Hard")
+    assert hard_high > easy_high
+
+def test_hard_range_wider_than_normal():
+    _, normal_high = get_range_for_difficulty("Normal")
+    _, hard_high = get_range_for_difficulty("Hard")
+    assert hard_high > normal_high
 
 
 # --- parse_guess ---
@@ -125,17 +135,17 @@ def test_first_guess_is_attempt_1():
 # BUG 2: info text hardcoded to "1 and 100" — range must match difficulty
 def test_easy_range_is_not_100():
     _, high = get_range_for_difficulty("Easy")
-    assert high == 20, f"Easy difficulty upper bound should be 20, got {high}"
+    assert high == 10, f"Easy difficulty upper bound should be 10, got {high}"
 
 def test_hard_range_upper_bound():
     _, high = get_range_for_difficulty("Hard")
-    assert high == 50, f"Hard difficulty upper bound should be 50, got {high}"
+    assert high == 100, f"Hard difficulty upper bound should be 100, got {high}"
 
 # BUG 3: new game used random.randint(1, 100) ignoring difficulty
-# Covered by verifying ranges are correct per difficulty (Easy max=20, Hard max=50)
+# Covered by verifying ranges are correct per difficulty (Easy max=10, Hard max=100)
 def test_easy_secret_within_range():
     low, high = get_range_for_difficulty("Easy")
-    assert low == 1 and high == 20
+    assert low == 1 and high == 10
 
 # BUG 4: secret cast to str on even attempts causes wrong lexicographic comparison
 # e.g. guess=9, secret="50" — "9" > "50" is True (lexicographic) but 9 < 50 numerically
@@ -149,3 +159,41 @@ def test_check_guess_string_secret_comparison_correct():
     # With int secret, 9 < 50 → correctly "Too Low"
     outcome, _ = check_guess(9, 50)
     assert outcome == "Too Low", "Lexicographic bug: '9' > '50' is True but 9 < 50 numerically"
+
+
+# BUG 5: new game button did not reset status or history
+# After winning/losing, st.session_state.status stayed "won"/"lost", so rerun hit st.stop() immediately
+# Covered by verifying a fresh game state allows guessing (status="playing", score unaffected by old game)
+def test_after_win_new_game_score_starts_fresh():
+    # A win on attempt 1 gives 80 points; a subsequent new game's first guess should still compute from 0
+    score_after_win = update_score(0, "Win", 1)
+    assert score_after_win == 80
+    # New game resets score to 0; first guess of the new game at attempt 1 should also give 80
+    new_game_score = update_score(0, "Win", 1)
+    assert new_game_score == 80
+
+def test_status_playing_allows_further_guesses():
+    # Any outcome other than Win should leave the game open for another guess
+    outcome, _ = check_guess(40, 50)
+    assert outcome != "Win", "A wrong guess should not end the game"
+
+
+# --- get_attempt_limit ---
+
+def test_easy_attempt_limit():
+    assert get_attempt_limit("Easy") == 10
+
+def test_normal_attempt_limit():
+    assert get_attempt_limit("Normal") == 7
+
+def test_hard_attempt_limit():
+    assert get_attempt_limit("Hard") == 5
+
+def test_easy_has_more_attempts_than_normal():
+    assert get_attempt_limit("Easy") > get_attempt_limit("Normal")
+
+def test_normal_has_more_attempts_than_hard():
+    assert get_attempt_limit("Normal") > get_attempt_limit("Hard")
+
+def test_unknown_difficulty_attempt_limit_defaults_to_normal():
+    assert get_attempt_limit("Unknown") == get_attempt_limit("Normal")

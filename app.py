@@ -1,6 +1,6 @@
 import random
 import streamlit as st
-from logic_utils import check_guess, get_range_for_difficulty, parse_guess, update_score
+from logic_utils import check_guess, get_attempt_limit, get_range_for_difficulty, parse_guess, update_score
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -15,12 +15,7 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
-attempt_limit_map = {
-    "Easy": 6,
-    "Normal": 8,
-    "Hard": 5,
-}
-attempt_limit = attempt_limit_map[difficulty]
+attempt_limit = get_attempt_limit(difficulty)
 
 low, high = get_range_for_difficulty(difficulty)
 
@@ -75,6 +70,9 @@ if new_game:
     st.session_state.attempts = 0
     # FIX: New game was always using (1, 100) regardless of difficulty; now respects selected range
     st.session_state.secret = random.randint(low, high)
+    # FIX: status and history were not reset, so the game stayed in "won"/"lost" and called st.stop() on rerun
+    st.session_state.status = "playing"
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 

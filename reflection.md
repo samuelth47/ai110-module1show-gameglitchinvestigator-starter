@@ -29,7 +29,7 @@ Document at least 3 bugs you found. Add rows as needed.
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
   * Claude suggested the check_guess solution of reversed hint and it was correct. I used the solution suggested and tested it on the game and it was correct.
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
-  * No suggestions were incorrect or misleading
+  * Claude gave me a wrong suggestion when trying to run the pytest testcases where I was facing a module not found error. It just suggested to use the same import file which was not working but after giving it enough context it fixed the error.
 
 ---
 
