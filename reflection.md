@@ -50,7 +50,7 @@ Document at least 3 bugs you found. Add rows as needed.
 ## 4. What did you learn about Streamlit and state?
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
-
+  * Every time you click a button or type something in a Streamlit app, the entire Python script runs again from top to bottom, which is the rerun. It's like refreshing a page, except it happens automatically. Session state is Streamlit's way of letting you save values across those reruns, like a sticky notepad that survives the refresh. 
 
 ---
 
@@ -58,5 +58,10 @@ Document at least 3 bugs you found. Add rows as needed.
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
+      * Not just blankly asking AI fix the issue or give me the issues, but finding them myself and having expectations
+        of how it should work and directing the AI to fix them, then testing to see if the suggestions were accurate.
 - What is one thing you would do differently next time you work with AI on a coding task?
+    * Using better prompts and giving as much context as possible for a better result.
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+    * This project showed me the possibility of AI generated code but also the dangers of it. If not controlled and 
+      directed the AI can hallucinate and provide misleading suggestions leading to more complicated problems.
