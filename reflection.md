@@ -51,6 +51,7 @@ Document at least 3 bugs you found. Add rows as needed.
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
 
+
 ---
 
 ## 5. Looking ahead: your developer habits
